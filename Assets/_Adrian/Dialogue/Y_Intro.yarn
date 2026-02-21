@@ -1,0 +1,16 @@
+﻿title: Start
+---
+Joe: Welcome!
+    Joe:Say Yo
+    ->Yo
+        Joe:Yo
+        <<jump Mid>>
+    ->not Yo
+        Joe: :(
+        <<stop>>
+===
+
+title: Mid
+---
+Joe:Middle
+===
