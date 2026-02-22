@@ -15,6 +15,9 @@ public class DialogueInteract : MonoBehaviour
     [Header("Input Settings")]
     [Tooltip("The key to press to start dialogue")]
     [SerializeField] private Key interactionKey = Key.Enter;
+    public bool touchToInteract = false;
+    public bool canInteractMultipleTimes = true;
+    private bool _hasBeenInteractedWith = false;
 
     public bool inDialogue = false;
 
@@ -63,7 +66,7 @@ public class DialogueInteract : MonoBehaviour
     {
         // Check for interaction input when player is in range
         // Only allow starting dialogue if not already talking and no other dialogue is running
-        if (playerInRange && !isCurrentlyTalking && !dialogueRunner.IsDialogueRunning)
+        if (!touchToInteract && playerInRange && !isCurrentlyTalking && !dialogueRunner.IsDialogueRunning)
         {
             if (Keyboard.current[interactionKey].wasPressedThisFrame)
             {
@@ -74,6 +77,16 @@ public class DialogueInteract : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if(_hasBeenInteractedWith)
+        {
+            return;
+        }
+
+        if (touchToInteract && other.CompareTag("Player") && !isCurrentlyTalking && !dialogueRunner.IsDialogueRunning)
+        {
+            StartDialogue();
+        }
+
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
@@ -108,7 +121,10 @@ public class DialogueInteract : MonoBehaviour
                     jumpAction.Enable();
                 }
             }
-            
+            if (!canInteractMultipleTimes)
+            {
+                _hasBeenInteractedWith = true;
+            }
             
             Debug.Log($"Player left range of {gameObject.name}");
         }

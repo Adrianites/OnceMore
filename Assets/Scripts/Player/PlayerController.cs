@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Cinemachine;
+using Yarn.Unity;
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,7 +21,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CinemachineCamera mainCam;
     [SerializeField] private PlayerInputHandler playerInputHandler;
     public CinemachineImpulseSource impulseSource;
-    public DialogueInteract dialogueInteract;
+
+    private DialogueRunner dialogueRunner;
 
     private Vector3 currentMovement;
     private float verticalRotation;
@@ -34,15 +36,31 @@ public class PlayerController : MonoBehaviour
 
     public void Update()
     {
-        if(dialogueInteract != null)
+        bool inDialogueActive = false;
+
+        if (dialogueRunner == null)
         {
-            if(dialogueInteract.inDialogue == false)
-            {
-                HandleMovement();
-                HandleRotation();
-            }
+            dialogueRunner = FindFirstObjectByType<DialogueRunner>();
+        }
+
+        if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
+        {
+            inDialogueActive = true;
         }
         else
+        {
+            var interacts = FindObjectsByType<DialogueInteract>(FindObjectsSortMode.None);
+            for (int i = 0; i < interacts.Length; i++)
+            {
+                if (interacts[i] != null && interacts[i].inDialogue)
+                {
+                    inDialogueActive = true;
+                    break;
+                }
+            }
+        }
+
+        if (!inDialogueActive)
         {
             HandleMovement();
             HandleRotation();
