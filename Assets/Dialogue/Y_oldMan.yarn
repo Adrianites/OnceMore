@@ -1,0 +1,30 @@
+﻿title: oldman_dayOne_start
+---
+<<once>>
+Old Man: Psss, young one.
+    ->Me: Are you talking to me mister?
+        <<jump oldman_dayOne_dialogue2>>
+    ->Me: Good morning, are you also going to pick some flowers?
+        Old Man: No child. The flowers feel pain.
+        <<stop>>
+<<endonce>>
+Old Man: Go now child...
+===
+
+title: oldman_dayOne_dialogue2
+---
+Old Man: Yes.
+Old Man: Dear child, you should find your peace...
+<<stop>>
+===
+
+title: oldman_dayTwo_start
+---
+Old Man: I have noticed you picked those flowers.
+    ->Me: Yes, they are very pretty, aren't they?
+        Old Man: ...
+    ->Me: I have.
+        Old Man: the flowers have feelings, just like you.
+    Old Man: Be aware youre destroying life.
+    <<stop>>
+===
