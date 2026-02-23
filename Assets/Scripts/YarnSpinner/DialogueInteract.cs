@@ -18,8 +18,16 @@ public class DialogueInteract : MonoBehaviour
     public bool touchToInteract = false;
     public bool canInteractMultipleTimes = true;
     private bool _hasBeenInteractedWith = false;
-
     public bool inDialogue = false;
+    public bool DespawnSomething = false;
+    public GameObject thingToDespawn;
+
+    [Header("Character Rotation")]
+    [SerializeField] private bool enableCharacterRotation = false;
+    [SerializeField] private Transform npcTransform;
+    [SerializeField] private float characterRotationDuration = 0.25f;
+    private bool _hasRotatedToCharacter = false;
+    private Transform playerTransform;
 
     // State tracking
     private bool playerInRange = false;
@@ -44,6 +52,7 @@ public class DialogueInteract : MonoBehaviour
         if (player != null)
         {
             playerInput = player.GetComponent<PlayerInput>();
+            playerTransform = player.transform;
         }
 
         // Subscribe to dialogue complete event to know when conversation ends
@@ -132,8 +141,17 @@ public class DialogueInteract : MonoBehaviour
 
     private void StartDialogue()
     {
-        if (dialogueRunner == null) return;
-        
+        if (dialogueRunner == null)
+        {
+            return;
+        }
+
+        if (enableCharacterRotation && !_hasRotatedToCharacter && playerTransform != null && npcTransform != null)
+        {
+            StartCoroutine(RotateBothToFaceEachOther());
+            _hasRotatedToCharacter = true;
+        }
+
         isCurrentlyTalking = true;
         inDialogue = true;
         Cursor.lockState = CursorLockMode.Confined;
@@ -148,7 +166,10 @@ public class DialogueInteract : MonoBehaviour
 
     private void OnDialogueComplete()
     {
-        StartCoroutine(IWaitAfterDialogueEnd());
+        if(this.gameObject.activeInHierarchy)
+        {
+            StartCoroutine(IWaitAfterDialogueEnd());
+        }
     }
 
     IEnumerator IWaitAfterDialogueEnd()
@@ -158,5 +179,41 @@ public class DialogueInteract : MonoBehaviour
         inDialogue = false;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    IEnumerator RotateBothToFaceEachOther()
+    {
+        if (playerTransform == null || npcTransform == null)
+            yield break;
+
+        float duration = Mathf.Max(0.01f, characterRotationDuration);
+        float elapsed = 0f;
+
+        Quaternion startPlayerRot = playerTransform.rotation;
+        Vector3 playerDir = npcTransform.position - playerTransform.position;
+        playerDir.y = 0f;
+        Quaternion targetPlayerRot = playerDir.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(playerDir.normalized) : startPlayerRot;
+
+        Quaternion startOtherRot = npcTransform.rotation;
+        Vector3 otherDir = playerTransform.position - npcTransform.position;
+        otherDir.y = 0f;
+        Quaternion targetOtherRot = otherDir.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(otherDir.normalized) : startOtherRot;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
+            playerTransform.rotation = Quaternion.Slerp(startPlayerRot, targetPlayerRot, t);
+            npcTransform.rotation = Quaternion.Slerp(startOtherRot, targetOtherRot, t);
+            yield return null;
+        }
+
+        playerTransform.rotation = targetPlayerRot;
+        npcTransform.rotation = targetOtherRot;
+
+        if(DespawnSomething && thingToDespawn != null)
+        {
+            thingToDespawn.SetActive(false);
+        }
     }
 }

@@ -57,7 +57,7 @@ MonoBehaviour:
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
-    FieldOfView: 90
+    FieldOfView: 45
     OrthographicSize: 5
     NearClipPlane: 0.3
     FarClipPlane: 1000
@@ -490,9 +490,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 878999981efaf3b4a96aefdc5d96365c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  walkSpeed: 15
-  sprintMultiplier: 2
-  jumpForce: 20
+  walkSpeed: 5
+  sprintMultiplier: 1.5
+  jumpForce: 0
   gravityMultiplier: 5
   mouseSensitivity: 0.1
   upDownLookRange: 80
@@ -500,7 +500,6 @@ MonoBehaviour:
   mainCam: {fileID: 5206644578195845908}
   playerInputHandler: {fileID: 1511822487107602737}
   impulseSource: {fileID: 3332904071029230768}
-  dialogueInteract: {fileID: 0}
 --- !u!114 &3332904071029230768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -523,7 +522,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     ImpulseDuration: 0.2
-    ImpulseType: 1
+    ImpulseType: 0
     DissipationRate: 0.25
     RawSignal: {fileID: 0}
     AmplitudeGain: 1
@@ -553,7 +552,7 @@ MonoBehaviour:
     DissipationMode: 2
     DissipationDistance: 100
     PropagationSpeed: 343
-  DefaultVelocity: {x: 0.067, y: 0.67, z: 0.67}
+  DefaultVelocity: {x: 0.067, y: 0.067, z: 0.067}
 --- !u!1 &8658233269871118742
 GameObject:
   m_ObjectHideFlags: 0
@@ -623,7 +622,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 90
+  field of view: 45
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
