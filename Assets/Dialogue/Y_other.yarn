@@ -1,29 +1,34 @@
 ﻿title: Start
 ---
+<<playSFX 1>>
 Me: What a beautiful day to pick some flowers.
     <<stop>>
 ===
 
 title: TalkingAboutFlowers
 ---
+<<playSFX 1>>
 Me:I should pick those flowers over there.
     <<stop>>
 ===
 
 title: RedFlowers
 ---
+<<playSFX 1>>
 Me:Why are the flowers red?
-    <<stop>>
+    <<jump plantDialogue>>
 ===
 
 title: PrettyLandscape
 ---
+<<playSFX 1>>
 Me: What a beautiful sight to see..
     <<stop>>
 ===
 
 title: WheresTheOldMan
 ---
+<<playSFX 1>>
 Me: Where is that old man?
     <<stop>>
 ===

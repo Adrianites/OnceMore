@@ -3,6 +3,8 @@ using UnityEngine.Rendering;
 
 public class LightingManager : MonoBehaviour
 {
+    private enum LightingState { Day, TransitionToNight, Night, TransitionToDay }
+
     [SerializeField] private Light directionalLight;
     [SerializeField] private LightingPreset preset;
     [SerializeField, Range(0f, 24f)] private float timeOfDay;
@@ -22,47 +24,57 @@ public class LightingManager : MonoBehaviour
     [SerializeField] private Transform lightInHandTransform;
     [SerializeField] private float handLightRaiseHeight = 0.3f;
 
+    [Header("Ambience Audio")]
+    [SerializeField] private AudioSource dayAmbienceSource;
+    [SerializeField] private AudioSource nightAmbienceSource;
+    [SerializeField, Range(0f, 1f)] private float ambienceVolume = 0.5f;
+
     [Header("Candle Flicker")]
     [SerializeField] private float flickerSpeed = 8f;
     [SerializeField, Range(0f, 1f)] private float flickerAmount = 0.15f;
 
-    private bool isTransitioning;
-    private bool isNight;
+    private const float SkyboxFadeStart = 0.35f;
+    private const float SkyboxSwapPoint = 0.50f;
+    private const float SkyboxFadeEnd   = 0.65f;
+    private const float InvFadeOutRange = 1f / (SkyboxSwapPoint - SkyboxFadeStart);
+    private const float InvFadeInRange  = 1f / (SkyboxFadeEnd - SkyboxSwapPoint);
+
+    public bool IsNight => state == LightingState.Night;
+    public bool IsTransitioning => state == LightingState.TransitionToNight || state == LightingState.TransitionToDay;
+
+    private LightingState state = LightingState.Day;
     private float transitionTimer;
-    private float startTimeOfDay;
     private bool skyboxSwapped;
 
     private Material originalSkyboxInstance;
     private Material starrySkyboxInstance;
 
+    private float startTimeOfDay;
+    private float targetTimeOfDay;
     private Color startAmbient;
-    private Color startDirectionalColor;
+    private Color targetAmbient;
     private Color startFog;
+    private Color targetFog;
+    private Color startDirectionalColor;
+    private Color targetDirectionalColor;
     private Quaternion startRotation;
+    private Quaternion targetRotation;
+    private float currentDuration;
+
     private float originalExposure;
     private float starryExposure;
-    private AmbientMode originalAmbientMode;
-    private float[] nightLightTargetIntensities;
 
-    private Color cachedNightAmbient;
-    private Color cachedNightFog;
-    private Color cachedNightDirColor;
-    private Quaternion cachedNightRotation;
+    private Material fadeOutSkybox;
+    private Material fadeInSkybox;
+    private float fadeOutExposure;
+    private float fadeInExposure;
+
+    private float flickerBaseline;
 
     private GameObject handLightInstance;
     private Light handLight;
     private Vector3 handLightStartLocalPos;
     private Vector3 handLightTargetLocalPos;
-
-    private bool isDayTransitioning;
-    private float dayTransitionTimer;
-    private float dayStartTimeOfDay;
-    private bool daySkyboxSwapped;
-
-    private Color dayStartAmbient;
-    private Color dayStartFog;
-    private Color dayStartDirectionalColor;
-    private Quaternion dayStartRotation;
 
     private struct RenderSnapshot
     {
@@ -82,14 +94,9 @@ public class LightingManager : MonoBehaviour
 
     private void Start()
     {
-        if (nightLights != null)
-        {
-            foreach (Light l in nightLights)
-            {
-                if (l != null)
-                    l.intensity = 0f;
-            }
-        }
+        flickerBaseline = 1f - flickerAmount;
+        SetNightLightsIntensity(0f);
+        InitAmbience();
     }
 
     private void Update()
@@ -97,176 +104,246 @@ public class LightingManager : MonoBehaviour
         if (preset == null)
             return;
 
-        if (Application.isPlaying)
+        if (!Application.isPlaying)
         {
-            if (isTransitioning)
-            {
-                transitionTimer += Time.deltaTime;
-                float t = Mathf.Clamp01(transitionTimer / transitionDuration);
+            UpdateLighting(timeOfDay / 24f);
+            return;
+        }
 
-                timeOfDay = Mathf.Lerp(startTimeOfDay, nightTimeTarget, t);
-
-                RenderSettings.ambientLight = Color.Lerp(startAmbient, cachedNightAmbient, t);
-                RenderSettings.fogColor = Color.Lerp(startFog, cachedNightFog, t);
-
-                if (directionalLight != null)
-                {
-                    directionalLight.color = Color.Lerp(startDirectionalColor, cachedNightDirColor, t);
-                    directionalLight.transform.localRotation = Quaternion.Slerp(startRotation, cachedNightRotation, t);
-                }
-
-                if (starrySkyboxInstance != null && originalSkyboxInstance != null)
-                {
-                    const float fadeStart = 0.35f;
-                    const float swapPoint = 0.50f;
-                    const float fadeEnd   = 0.65f;
-
-                    if (!skyboxSwapped)
-                    {
-                        if (t >= fadeStart && t < swapPoint)
-                        {
-                            float fade = Mathf.Clamp01((t - fadeStart) / (swapPoint - fadeStart));
-                            SetExposure(originalSkyboxInstance, Mathf.Lerp(originalExposure, 0f, fade));
-                        }
-                        else if (t >= swapPoint)
-                        {
-                            SetExposure(starrySkyboxInstance, 0f);
-                            RenderSettings.skybox = starrySkyboxInstance;
-                            skyboxSwapped = true;
-                            DynamicGI.UpdateEnvironment();
-                        }
-                    }
-                    else if (t < fadeEnd)
-                    {
-                        float fade = Mathf.Clamp01((t - swapPoint) / (fadeEnd - swapPoint));
-                        SetExposure(starrySkyboxInstance, Mathf.Lerp(0f, starryExposure, fade));
-                    }
-                }
-
-                FadeNightLights(t);
-
-                if (lightInHandTransform != null && handLightInstance != null)
-                    lightInHandTransform.localPosition = Vector3.Lerp(handLightStartLocalPos, handLightTargetLocalPos, Mathf.SmoothStep(0f, 1f, t));
-
-                if (t >= 1f)
-                {
-                    isTransitioning = false;
-                    isNight = true;
-
-                    if (starrySkyboxInstance != null)
-                    {
-                        SetExposure(starrySkyboxInstance, starryExposure);
-                        RenderSettings.skybox = starrySkyboxInstance;
-                        DynamicGI.UpdateEnvironment();
-                    }
-
-                    FadeNightLights(1f);
-
-                    if (originalSkyboxInstance != null)
-                    {
-                        Destroy(originalSkyboxInstance);
-                        originalSkyboxInstance = null;
-                    }
-                }
-            }
-            else if (isDayTransitioning)
-            {
-                dayTransitionTimer += Time.deltaTime;
-                float t = Mathf.Clamp01(dayTransitionTimer / dayTransitionDuration);
-
-                timeOfDay = Mathf.Lerp(dayStartTimeOfDay, savedDay.timeOfDay, t);
-
-                RenderSettings.ambientLight = Color.Lerp(dayStartAmbient, savedDay.ambientLight, t);
-                RenderSettings.fogColor = Color.Lerp(dayStartFog, savedDay.fogColor, t);
-
-                if (directionalLight != null)
-                {
-                    directionalLight.color = Color.Lerp(dayStartDirectionalColor, savedDay.directionalColor, t);
-                    directionalLight.transform.localRotation = Quaternion.Slerp(dayStartRotation, savedDay.directionalRotation, t);
-                }
-
-                if (starrySkyboxInstance != null && savedDay.skybox != null)
-                {
-                    const float fadeStart = 0.35f;
-                    const float swapPoint = 0.50f;
-                    const float fadeEnd   = 0.65f;
-
-                    if (!daySkyboxSwapped)
-                    {
-                        if (t >= fadeStart && t < swapPoint)
-                        {
-                            float fade = Mathf.Clamp01((t - fadeStart) / (swapPoint - fadeStart));
-                            SetExposure(starrySkyboxInstance, Mathf.Lerp(starryExposure, 0f, fade));
-                        }
-                        else if (t >= swapPoint)
-                        {
-                            originalSkyboxInstance = new Material(savedDay.skybox);
-                            SetExposure(originalSkyboxInstance, 0f);
-                            RenderSettings.skybox = originalSkyboxInstance;
-                            daySkyboxSwapped = true;
-                            DynamicGI.UpdateEnvironment();
-                        }
-                    }
-                    else if (t < fadeEnd)
-                    {
-                        float fade = Mathf.Clamp01((t - swapPoint) / (fadeEnd - swapPoint));
-                        SetExposure(originalSkyboxInstance, Mathf.Lerp(0f, originalExposure, fade));
-                    }
-                }
-
-                FadeNightLightsReverse(t);
-
-                if (lightInHandTransform != null && handLightInstance != null)
-                    lightInHandTransform.localPosition = Vector3.Lerp(handLightTargetLocalPos, handLightStartLocalPos, Mathf.SmoothStep(0f, 1f, t));
-
-                if (t >= 1f)
-                {
-                    isDayTransitioning = false;
-                    isNight = false;
-
-                    RestoreDaySnapshot();
-
-                    if (originalSkyboxInstance != null)
-                    {
-                        Destroy(originalSkyboxInstance);
-                        originalSkyboxInstance = null;
-                    }
-                    if (starrySkyboxInstance != null)
-                    {
-                        Destroy(starrySkyboxInstance);
-                        starrySkyboxInstance = null;
-                    }
-
-                    if (handLightInstance != null)
-                    {
-                        if (lightInHandTransform != null)
-                            lightInHandTransform.localPosition = handLightStartLocalPos;
-
-                        Destroy(handLightInstance);
-                        handLightInstance = null;
-                        handLight = null;
-                    }
-
-                    if (nightLights != null)
-                    {
-                        foreach (Light l in nightLights)
-                        {
-                            if (l != null) l.intensity = 0f;
-                        }
-                    }
-
-                    hasSavedDaySettings = false;
-                }
-            }
-            else if (isNight)
-            {
+        switch (state)
+        {
+            case LightingState.TransitionToNight:
+            case LightingState.TransitionToDay:
+                UpdateTransition();
+                break;
+            case LightingState.Night:
                 FlickerNightLights();
+                break;
+        }
+    }
+
+    private void UpdateTransition()
+    {
+        transitionTimer += Time.deltaTime;
+        float t = Mathf.Clamp01(transitionTimer / currentDuration);
+        float eased = Mathf.SmoothStep(0f, 1f, t);
+
+        timeOfDay = Mathf.Lerp(startTimeOfDay, targetTimeOfDay, eased);
+        RenderSettings.ambientLight = Color.Lerp(startAmbient, targetAmbient, eased);
+        RenderSettings.fogColor = Color.Lerp(startFog, targetFog, eased);
+
+        if (directionalLight != null)
+        {
+            directionalLight.color = Color.Lerp(startDirectionalColor, targetDirectionalColor, eased);
+            directionalLight.transform.localRotation = Quaternion.Slerp(startRotation, targetRotation, eased);
+        }
+
+        UpdateSkyboxCrossFade(t);
+        CrossfadeAmbience(eased);
+
+        bool toNight = state == LightingState.TransitionToNight;
+        float lightT = toNight ? t : 1f - t;
+        FadeNightLights(lightT);
+
+        if (lightInHandTransform != null && handLightInstance != null)
+        {
+            Vector3 from = toNight ? handLightStartLocalPos : handLightTargetLocalPos;
+            Vector3 to   = toNight ? handLightTargetLocalPos : handLightStartLocalPos;
+            lightInHandTransform.localPosition = Vector3.Lerp(from, to, eased);
+        }
+
+        if (t >= 1f)
+            FinaliseTransition();
+    }
+
+    private void UpdateSkyboxCrossFade(float t)
+    {
+        if (fadeOutSkybox == null)
+            return;
+
+        if (!skyboxSwapped)
+        {
+            if (t >= SkyboxFadeStart && t < SkyboxSwapPoint)
+            {
+                float fade = Mathf.Clamp01((t - SkyboxFadeStart) * InvFadeOutRange);
+                SetExposure(fadeOutSkybox, fadeOutExposure * (1f - fade));
             }
+            else if (t >= SkyboxSwapPoint)
+            {
+                if (fadeInSkybox == null && state == LightingState.TransitionToDay && savedDay.skybox != null)
+                {
+                    originalSkyboxInstance = new Material(savedDay.skybox);
+                    fadeInSkybox = originalSkyboxInstance;
+                }
+
+                if (fadeInSkybox != null)
+                {
+                    SetExposure(fadeInSkybox, 0f);
+                    RenderSettings.skybox = fadeInSkybox;
+                    skyboxSwapped = true;
+                    DynamicGI.UpdateEnvironment();
+                }
+            }
+        }
+        else if (fadeInSkybox != null && t < SkyboxFadeEnd)
+        {
+            float fade = Mathf.Clamp01((t - SkyboxSwapPoint) * InvFadeInRange);
+            SetExposure(fadeInSkybox, fadeInExposure * fade);
+        }
+    }
+
+    private void FinaliseTransition()
+    {
+        if (state == LightingState.TransitionToNight)
+        {
+            state = LightingState.Night;
+
+            if (starrySkyboxInstance != null)
+            {
+                SetExposure(starrySkyboxInstance, starryExposure);
+                RenderSettings.skybox = starrySkyboxInstance;
+                DynamicGI.UpdateEnvironment();
+            }
+
+            FadeNightLights(1f);
+            DestroyMaterial(ref originalSkyboxInstance);
         }
         else
         {
-            UpdateLighting(timeOfDay / 24f);
+            state = LightingState.Day;
+            RestoreDaySnapshot();
+
+            DestroyMaterial(ref originalSkyboxInstance);
+            DestroyMaterial(ref starrySkyboxInstance);
+
+            if (handLightInstance != null)
+            {
+                if (lightInHandTransform != null)
+                    lightInHandTransform.localPosition = handLightStartLocalPos;
+
+                Destroy(handLightInstance);
+                handLightInstance = null;
+                handLight = null;
+            }
+
+            SetNightLightsIntensity(0f);
+            hasSavedDaySettings = false;
         }
+
+        fadeOutSkybox = null;
+        fadeInSkybox = null;
+    }
+
+    public void TriggerNightTransition()
+    {
+        if (state == LightingState.Night || state == LightingState.TransitionToNight)
+            return;
+
+        if (state == LightingState.TransitionToDay)
+            CleanupTransitionMaterials();
+
+        if (!hasSavedDaySettings)
+        {
+            SaveDaySnapshot();
+            hasSavedDaySettings = true;
+        }
+
+        float targetPercent = nightTimeTarget / 24f;
+        targetAmbient = preset.ambientColour.Evaluate(targetPercent);
+        targetFog = preset.fogColour.Evaluate(targetPercent);
+        targetDirectionalColor = preset.directionalColour.Evaluate(targetPercent);
+        targetRotation = Quaternion.Euler((targetPercent * 360f) - 90f, 170f, 0f);
+        targetTimeOfDay = nightTimeTarget;
+
+        CaptureCurrentAsStart();
+        currentDuration = transitionDuration;
+
+        RenderSettings.ambientMode = AmbientMode.Flat;
+
+        originalSkyboxInstance = RenderSettings.skybox != null ? new Material(RenderSettings.skybox) : null;
+        starrySkyboxInstance = starrySkybox != null ? new Material(starrySkybox) : null;
+
+        if (starrySkyboxInstance != null && starrySkyboxInstance.HasProperty(TintID))
+            starrySkyboxInstance.SetColor(TintID, Color.white);
+
+        if (originalSkyboxInstance != null)
+            RenderSettings.skybox = originalSkyboxInstance;
+
+        originalExposure = GetExposure(originalSkyboxInstance);
+        starryExposure = GetExposure(starrySkybox);
+
+        fadeOutSkybox = originalSkyboxInstance;
+        fadeInSkybox = starrySkyboxInstance;
+        fadeOutExposure = originalExposure;
+        fadeInExposure = starryExposure;
+
+        skyboxSwapped = false;
+        transitionTimer = 0f;
+
+        SpawnHandLight();
+
+        state = LightingState.TransitionToNight;
+    }
+
+    public void TriggerDayTransition()
+    {
+        if (state == LightingState.Day || state == LightingState.TransitionToDay)
+            return;
+
+        if (state == LightingState.TransitionToNight)
+            CleanupTransitionMaterials();
+
+        CaptureCurrentAsStart();
+        targetTimeOfDay = savedDay.timeOfDay;
+        targetAmbient = savedDay.ambientLight;
+        targetFog = savedDay.fogColor;
+        targetDirectionalColor = savedDay.directionalColor;
+        targetRotation = savedDay.directionalRotation;
+        currentDuration = dayTransitionDuration;
+
+        RenderSettings.ambientMode = savedDay.ambientMode;
+
+        if (starrySkyboxInstance == null && RenderSettings.skybox != null)
+            starrySkyboxInstance = new Material(RenderSettings.skybox);
+
+        starryExposure = GetExposure(starrySkyboxInstance);
+        originalExposure = GetExposure(savedDay.skybox);
+
+        fadeOutSkybox = starrySkyboxInstance;
+        fadeInSkybox = null;
+        fadeOutExposure = starryExposure;
+        fadeInExposure = originalExposure;
+
+        skyboxSwapped = false;
+        transitionTimer = 0f;
+
+        state = LightingState.TransitionToDay;
+    }
+
+    private void CaptureCurrentAsStart()
+    {
+        startTimeOfDay = timeOfDay;
+        startAmbient = RenderSettings.ambientLight;
+        startFog = RenderSettings.fogColor;
+
+        if (directionalLight != null)
+        {
+            startDirectionalColor = directionalLight.color;
+            startRotation = directionalLight.transform.localRotation;
+        }
+        else
+        {
+            startDirectionalColor = Color.white;
+            startRotation = Quaternion.identity;
+        }
+    }
+
+    private void CleanupTransitionMaterials()
+    {
+        DestroyMaterial(ref originalSkyboxInstance);
+        DestroyMaterial(ref starrySkyboxInstance);
+        fadeOutSkybox = null;
+        fadeInSkybox = null;
     }
 
     private void SaveDaySnapshot()
@@ -294,7 +371,6 @@ public class LightingManager : MonoBehaviour
         }
 
         timeOfDay = savedDay.timeOfDay;
-
         DynamicGI.UpdateEnvironment();
     }
 
@@ -306,106 +382,67 @@ public class LightingManager : MonoBehaviour
         if (directionalLight != null)
         {
             directionalLight.color = preset.directionalColour.Evaluate(timePercent);
-            directionalLight.transform.localRotation = Quaternion.Euler(new Vector3((timePercent * 360f) - 90f, 170f, 0));
+            directionalLight.transform.localRotation = Quaternion.Euler((timePercent * 360f) - 90f, 170f, 0f);
         }
     }
 
-    public void TriggerNightTransition()
+    private void SpawnHandLight()
     {
-        if (isNight || isTransitioning || isDayTransitioning)
+        if (handLightPrefab == null || lightInHandTransform == null || handLightInstance != null)
             return;
 
-        if (!hasSavedDaySettings)
+        handLightInstance = Instantiate(handLightPrefab, lightInHandTransform);
+        handLightInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+
+        handLight = handLightInstance.GetComponentInChildren<Light>();
+        if (handLight != null)
+            handLight.intensity = 0f;
+
+        handLightStartLocalPos = lightInHandTransform.localPosition;
+        handLightTargetLocalPos = handLightStartLocalPos + Vector3.up * handLightRaiseHeight;
+    }
+
+    private void SetNightLightsIntensity(float intensity)
+    {
+        if (nightLights == null) return;
+        for (int i = 0; i < nightLights.Length; i++)
         {
-            SaveDaySnapshot();
-            hasSavedDaySettings = true;
-        }
-
-        startTimeOfDay = timeOfDay;
-        transitionTimer = 0f;
-        isTransitioning = true;
-
-        startAmbient = RenderSettings.ambientLight;
-        startFog = RenderSettings.fogColor;
-        startDirectionalColor = directionalLight != null ? directionalLight.color : Color.white;
-        startRotation = directionalLight != null ? directionalLight.transform.localRotation : Quaternion.identity;
-
-        originalAmbientMode = RenderSettings.ambientMode;
-        RenderSettings.ambientMode = AmbientMode.Flat;
-
-        float targetPercent = nightTimeTarget / 24f;
-        cachedNightAmbient = preset.ambientColour.Evaluate(targetPercent);
-        cachedNightFog = preset.fogColour.Evaluate(targetPercent);
-        cachedNightDirColor = preset.directionalColour.Evaluate(targetPercent);
-        cachedNightRotation = Quaternion.Euler(new Vector3((targetPercent * 360f) - 90f, 170f, 0));
-
-        originalSkyboxInstance = RenderSettings.skybox != null
-            ? new Material(RenderSettings.skybox)
-            : null;
-        starrySkyboxInstance = starrySkybox != null
-            ? new Material(starrySkybox)
-            : null;
-
-        if (starrySkyboxInstance != null && starrySkyboxInstance.HasProperty(TintID))
-            starrySkyboxInstance.SetColor(TintID, Color.white);
-
-        if (originalSkyboxInstance != null)
-            RenderSettings.skybox = originalSkyboxInstance;
-
-        skyboxSwapped = false;
-        originalExposure = GetExposure(originalSkyboxInstance);
-        starryExposure = GetExposure(starrySkybox);
-
-        if (handLightPrefab != null && lightInHandTransform != null && handLightInstance == null)
-        {
-            handLightInstance = Instantiate(handLightPrefab, lightInHandTransform);
-            handLightInstance.transform.localPosition = Vector3.zero;
-            handLightInstance.transform.localRotation = Quaternion.identity;
-
-            handLight = handLightInstance.GetComponentInChildren<Light>();
-            if (handLight != null)
-                handLight.intensity = 0f;
-
-            handLightStartLocalPos = lightInHandTransform.localPosition;
-            handLightTargetLocalPos = handLightStartLocalPos + Vector3.up * handLightRaiseHeight;
-        }
-
-        if (nightLights != null)
-        {
-            nightLightTargetIntensities = new float[nightLights.Length];
-            for (int i = 0; i < nightLights.Length; i++)
-            {
-                if (nightLights[i] != null)
-                {
-                    nightLightTargetIntensities[i] = nightLightIntensity;
-                    nightLights[i].intensity = 0f;
-                }
-            }
+            if (nightLights[i] != null)
+                nightLights[i].intensity = intensity;
         }
     }
 
-    public void TriggerDayTransition()
+    private void FadeNightLights(float t)
     {
-        if (!isNight || isTransitioning || isDayTransitioning)
-            return;
+        if (nightLights == null) return;
+        float intensity = nightLightIntensity * t;
+        for (int i = 0; i < nightLights.Length; i++)
+        {
+            if (nightLights[i] != null)
+                nightLights[i].intensity = intensity;
+        }
 
-        dayStartTimeOfDay = timeOfDay;
-        dayTransitionTimer = 0f;
-        isDayTransitioning = true;
-        daySkyboxSwapped = false;
+        if (handLight != null)
+            handLight.intensity = intensity;
+    }
 
-        dayStartAmbient = RenderSettings.ambientLight;
-        dayStartFog = RenderSettings.fogColor;
-        dayStartDirectionalColor = directionalLight != null ? directionalLight.color : Color.white;
-        dayStartRotation = directionalLight != null ? directionalLight.transform.localRotation : Quaternion.identity;
+    private void FlickerNightLights()
+    {
+        if (nightLights == null) return;
+        float time = Time.time * flickerSpeed;
 
-        RenderSettings.ambientMode = savedDay.ambientMode;
+        for (int i = 0; i < nightLights.Length; i++)
+        {
+            if (nightLights[i] == null) continue;
+            float noise = Mathf.PerlinNoise(time + i * 137.5f, i * 27.3f);
+            nightLights[i].intensity = nightLightIntensity * (flickerBaseline + noise * flickerAmount);
+        }
 
-        if (starrySkyboxInstance == null && RenderSettings.skybox != null)
-            starrySkyboxInstance = new Material(RenderSettings.skybox);
-
-        starryExposure = GetExposure(starrySkyboxInstance);
-        originalExposure = GetExposure(savedDay.skybox);
+        if (handLight != null)
+        {
+            float noise = Mathf.PerlinNoise(time + 999.7f, 53.1f);
+            handLight.intensity = nightLightIntensity * (flickerBaseline + noise * flickerAmount);
+        }
     }
 
     private float GetExposure(Material mat)
@@ -421,49 +458,44 @@ public class LightingManager : MonoBehaviour
             mat.SetFloat(ExposureID, value);
     }
 
-    private void FadeNightLights(float t)
+    private void DestroyMaterial(ref Material mat)
     {
-        if (nightLights == null || nightLightTargetIntensities == null) return;
-        for (int i = 0; i < nightLights.Length; i++)
+        if (mat != null)
         {
-            if (nightLights[i] != null)
-                nightLights[i].intensity = Mathf.Lerp(0f, nightLightTargetIntensities[i], t);
+            Destroy(mat);
+            mat = null;
         }
-
-        if (handLight != null)
-            handLight.intensity = Mathf.Lerp(0f, nightLightIntensity, t);
     }
 
-    private void FadeNightLightsReverse(float t)
+    private void InitAmbience()
     {
-        if (nightLights == null || nightLightTargetIntensities == null) return;
-        for (int i = 0; i < nightLights.Length; i++)
+        if (dayAmbienceSource != null)
         {
-            if (nightLights[i] != null)
-                nightLights[i].intensity = Mathf.Lerp(nightLightTargetIntensities[i], 0f, t);
+            dayAmbienceSource.volume = ambienceVolume;
+            dayAmbienceSource.loop = true;
+            if (!dayAmbienceSource.isPlaying)
+                dayAmbienceSource.Play();
         }
 
-        if (handLight != null)
-            handLight.intensity = Mathf.Lerp(nightLightIntensity, 0f, t);
+        if (nightAmbienceSource != null)
+        {
+            nightAmbienceSource.volume = 0f;
+            nightAmbienceSource.loop = true;
+            if (!nightAmbienceSource.isPlaying)
+                nightAmbienceSource.Play();
+        }
     }
 
-    private void FlickerNightLights()
+    private void CrossfadeAmbience(float t)
     {
-        if (nightLights == null) return;
-        for (int i = 0; i < nightLights.Length; i++)
-        {
-            if (nightLights[i] == null) continue;
-            float noise = Mathf.PerlinNoise(Time.time * flickerSpeed + i * 137.5f, i * 27.3f);
-            float flicker = 1f - flickerAmount + noise * flickerAmount;
-            nightLights[i].intensity = nightLightIntensity * flicker;
-        }
+        bool toNight = state == LightingState.TransitionToNight;
+        float nightT = toNight ? t : 1f - t;
 
-        if (handLight != null)
-        {
-            float noise = Mathf.PerlinNoise(Time.time * flickerSpeed + 999.7f, 53.1f);
-            float flicker = 1f - flickerAmount + noise * flickerAmount;
-            handLight.intensity = nightLightIntensity * flicker;
-        }
+        if (dayAmbienceSource != null)
+            dayAmbienceSource.volume = ambienceVolume * (1f - nightT);
+
+        if (nightAmbienceSource != null)
+            nightAmbienceSource.volume = ambienceVolume * nightT;
     }
 
     private void OnValidate()
@@ -488,21 +520,14 @@ public class LightingManager : MonoBehaviour
             }
         }
 
-        if (nightLights != null)
-        {
-            foreach (Light l in nightLights)
-            {
-                if (l != null)
-                    l.intensity = 0f;
-            }
-        }
+        SetNightLightsIntensity(0f);
+        flickerBaseline = 1f - flickerAmount;
     }
 
     private void OnDestroy()
     {
-        if (originalSkyboxInstance != null)
-            Destroy(originalSkyboxInstance);
+        DestroyMaterial(ref originalSkyboxInstance);
         if (starrySkyboxInstance != null && RenderSettings.skybox != starrySkyboxInstance)
-            Destroy(starrySkyboxInstance);
+            DestroyMaterial(ref starrySkyboxInstance);
     }
 }

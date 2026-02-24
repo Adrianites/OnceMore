@@ -5435,6 +5435,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c2d27a276c1884689171a6cde1cf7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PickupFlower
+  collectSoundEffect: {fileID: 50792289071673711, guid: f552bd6a64bf2a84d802174c59797a88, type: 3}
 --- !u!1 &8853433863346853260
 GameObject:
   m_ObjectHideFlags: 0

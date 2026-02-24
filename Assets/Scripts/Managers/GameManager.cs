@@ -1,4 +1,5 @@
 using UnityEngine;
+using Yarn.Unity;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour
     public Transform[] flowerSpawns;
     public GameObject flowerPrefab;
     public LightingManager lightingManager;
+    public DialogueRunner dialogueRunner;
 
     [Header("Day 1")]
     public GameObject[] dialogueDay1;
@@ -122,6 +124,21 @@ public class GameManager : MonoBehaviour
 
     private void ResetAllDialogues()
     {
+        if (dialogueRunner == null)
+        {
+            dialogueRunner = FindFirstObjectByType<DialogueRunner>();
+        }
+
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.VariableStorage.Clear();
+
+            if (dialogueRunner.YarnProject != null)
+            {
+                dialogueRunner.VariableStorage.Program = dialogueRunner.YarnProject.Program;
+            }
+        }
+
         foreach (GameObject dialogue in dialogueDay1)
         {
             DialogueInteract interact = dialogue.GetComponent<DialogueInteract>();

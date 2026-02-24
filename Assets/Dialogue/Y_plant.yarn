@@ -1,0 +1,12 @@
+﻿title: plantDialogue
+---
+<<playSFX 3>>
+Angry Plant:YOU KILLED ALL THOSE PEOPLE! YOU THINK YOU CAN JUST WALK IN HERE AND TAKE ME OUT? I'LL SHOW YOU WHAT HAPPENS TO PEOPLE WHO MESS WITH ME!
+        <<playSFX 1>>
+    ->Me:I didn't kill anyone. I just wanted to pick some flowers.
+        <<playSFX 3>>
+        Angry Plant:YOU LIE! YOU'RE A MONSTER!
+        <<playSFX 1>>
+        Me:... I'm a monster..?
+        <<stop>>
+===

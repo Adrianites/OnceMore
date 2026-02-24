@@ -1,30 +1,42 @@
 ﻿title: oldman_dayOne_start
 ---
 <<once>>
+<<playSFX 2>>
 Old Man: Psss, young one.
+        <<playSFX 1>>
     ->Me: Are you talking to me mister?
         <<jump oldman_dayOne_dialogue2>>
+        <<playSFX 1>>
     ->Me: Good morning, are you also going to pick some flowers?
+        <<playSFX 2>>
         Old Man: No child. The flowers feel pain.
         <<stop>>
 <<endonce>>
+<<playSFX 2>>
 Old Man: Go now child...
 ===
 
 title: oldman_dayOne_dialogue2
 ---
+<<playSFX 2>>
 Old Man: Yes.
+<<playSFX 2>>
 Old Man: Dear child, you should find your peace...
 <<stop>>
 ===
 
 title: oldman_dayTwo_start
 ---
+<<playSFX 2>>
 Old Man: I have noticed you picked those flowers.
+        <<playSFX 1>>
     ->Me: Yes, they are very pretty, aren't they?
         Old Man: ...
+        <<playSFX 1>>
     ->Me: I have.
+        <<playSFX 2>>
         Old Man: the flowers have feelings, just like you.
+    <<playSFX 2>>
     Old Man: Be aware youre destroying life.
     <<stop>>
 ===
