@@ -1,27 +1,29 @@
 ﻿title: Start
 ---
-Me: What a beautiful day to pick some flowers
+Me: What a beautiful day to pick some flowers.
     <<stop>>
 ===
 
-title: Mid
+title: TalkingAboutFlowers
 ---
-Me:I should really build a normal pathway to my beautiful home
-Me: Eh maybe later
+Me:I should pick those flowers over there.
     <<stop>>
 ===
 
-title: End
+title: RedFlowers
 ---
-Me:You can only interact with me once!
-    ->Me:Oh no!
-        <<stop>>
-    ->Me:Great
-        <<stop>>
+Me:Why are the flowers red?
+    <<stop>>
 ===
 
 title: PrettyLandscape
 ---
 Me: What a beautiful sight to see..
+    <<stop>>
+===
+
+title: WheresTheOldMan
+---
+Me: Where is that old man?
     <<stop>>
 ===

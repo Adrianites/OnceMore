@@ -50,9 +50,41 @@ MonoBehaviour:
   nightTimeTarget: 23
   transitionDuration: 6
   starrySkybox: {fileID: 2100000, guid: 6eecb3bb77b3f7a43a504fceda3b0b5f, type: 2}
-  nightLights: []
-  nightLightIntensity: 1
-  handLightPrefab: {fileID: 0}
+  nightLights:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  nightLightIntensity: 2
+  handLightPrefab: {fileID: 2257398514253990350, guid: ed3841902c387f5418fcfe85fa92b59f, type: 3}
   lightInHandTransform: {fileID: 0}
   handLightRaiseHeight: 0.3
   flickerSpeed: 8

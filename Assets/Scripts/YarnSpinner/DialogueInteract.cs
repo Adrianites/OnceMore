@@ -11,14 +11,16 @@ public class DialogueInteract : MonoBehaviour
     
     [Tooltip("The Yarn node to start when talking to this NPC")]
     [SerializeField] private string dialogueNode = "Start";
-
-    [Header("Input Settings")]
-    [Tooltip("The key to press to start dialogue")]
-    [SerializeField] private Key interactionKey = Key.Enter;
     public bool touchToInteract = false;
     public bool canInteractMultipleTimes = true;
     private bool _hasBeenInteractedWith = false;
     public bool inDialogue = false;
+
+    [Header("Input Settings")]
+    [Tooltip("The key to press to start dialogue")]
+    [SerializeField] private Key interactionKey = Key.Enter;
+
+    [Header("Despawn Actions")]
     public bool DespawnSomething = false;
     public GameObject thingToDespawn;
 
@@ -34,6 +36,16 @@ public class DialogueInteract : MonoBehaviour
     private bool isCurrentlyTalking = false;
     private PlayerInput playerInput;
 
+    public void ResetInteraction()
+    {
+        _hasBeenInteractedWith = false;
+        _hasRotatedToCharacter = false;
+
+        if(!this.gameObject.activeInHierarchy)
+        {
+            this.gameObject.SetActive(true);
+        }
+    }
     private void Start()
     {
 
