@@ -32,3 +32,50 @@ title: WheresTheOldMan
 Me: Where is that old man?
     <<stop>>
 ===
+
+title: NightOneDialogue
+---
+<<playSFX 1>>
+Me: I think I have picked enough flowers for today. I should head back home.
+    <<stop>>
+===
+
+title: NightTwoDialogue
+---
+<<playSFX 1>>
+Me: I think I have picked enough flowers for today. I wonder if I will see the old man tomorrow.
+<<playSFX 1>>
+Me: I should head back home.
+    <<stop>>
+===
+
+title: NightThreeDialogue
+---
+<<playSFX 1>>
+Me: What have I been doing? These flowers... people..?
+<<playSFX 1>>
+Me: I am losing my mind. I need to get some rest.
+    <<stop>>
+===
+
+title: DayOneEndDialogue
+---
+<<playSFX 1>>
+Me: I'm tired. I hope tomorrow will be just as bright as today.
+    <<stop>>
+===
+
+title: DayTwoEndDialogue
+---
+<<playSFX 1>>
+Me: The old man keeps coming back on my mind. I wonder if I will see him again.
+    <<stop>>
+===
+
+title: DayThreeEndDialogue
+---
+<<playSFX 1>>
+Me: I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster..
+Me: No.......
+    <<jump Start>>
+===

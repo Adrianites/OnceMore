@@ -59,7 +59,22 @@ public class GameManager : MonoBehaviour
                 collectedAllFlowers = true;
                 lightingManager.TriggerNightTransition();
                 isNightTime = true;
-                Debug.Log("All flowers collected! You win!");
+                
+                switch (currentDay)
+                {
+                    case 1:
+                        dialogueRunner.StartDialogue("NightOneDialogue");
+                        break;
+                    case 2:
+                        dialogueRunner.StartDialogue("NightTwoDialogue");
+                        break;
+                    case 3:
+                        dialogueRunner.StartDialogue("NightThreeDialogue");
+                        break;
+                    default:
+                        dialogueRunner.StartDialogue("NightOneDialogue");
+                        break;
+                }
             }
         }
     }
@@ -76,11 +91,26 @@ public class GameManager : MonoBehaviour
             lightingManager.TriggerDayTransition();
             DaySwitch();
             SpawnFlowers();
+
+            switch (currentDay - 1)
+            {
+                case 1:
+                    dialogueRunner.StartDialogue("DayOneEndDialogue");
+                    break;
+                case 2:
+                    dialogueRunner.StartDialogue("DayTwoEndDialogue");
+                    break;
+                case 3:
+                    dialogueRunner.StartDialogue("DayThreeEndDialogue");
+                    break;
+                default:
+                    dialogueRunner.StartDialogue("DayOneEndDialogue");
+                    break;
+            }
         }
         else
         {
             currentDay = 1;
-            Debug.Log("Game Over! You've completed all days!");
         }
         
     }
