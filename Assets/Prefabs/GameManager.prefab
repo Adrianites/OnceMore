@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4827908170643435331
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2517983352254444049}
+  m_Layer: 0
+  m_Name: LookAt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2517983352254444049
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4827908170643435331}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -10.4967, y: 6.5371494, z: -13.58636}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2330351711831094668}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5332670706848455756
 GameObject:
   m_ObjectHideFlags: 0
@@ -10,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2330351711831094668}
   - component: {fileID: 4662511063600239229}
+  - component: {fileID: 6450434596643835382}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -29,7 +61,8 @@ Transform:
   m_LocalPosition: {x: 7.9757, y: 3.84385, z: 9.01036}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2517983352254444049}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4662511063600239229
@@ -45,4 +78,49 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   flowersCollected: 0
-  totalFlowers: 5
+  totalFlowers: 1
+  isNightTime: 0
+  currentDay: 1
+  flowerSpawns:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  flowerPrefab: {fileID: 6174356269667410914, guid: a2d5e91feedad584ea429fd3e350c5f0, type: 3}
+  lightingManager: {fileID: 0}
+  dialogueRunner: {fileID: 0}
+  lookAtScript: {fileID: 6450434596643835382}
+  dialogueDay1:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  dialogueDay2:
+  - {fileID: 0}
+  dialogueDay3:
+  - {fileID: 0}
+  flowerAiPrefab: {fileID: 6174356269667410914, guid: 0c7c1d2c73d62964598579ca3bf7a2b3, type: 3}
+--- !u!114 &6450434596643835382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5332670706848455756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72376b9235261534caca85af30c9d366, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LookAt
+  playerTransform: {fileID: 0}
+  lookAtTransform: {fileID: 2517983352254444049}
+  characterRotationDuration: 1

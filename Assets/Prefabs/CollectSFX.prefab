@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5392479538328057219}
   - component: {fileID: 8040888762607424622}
   - component: {fileID: 4641414804228770959}
+  - component: {fileID: 9065435799685854868}
   m_Layer: 0
   m_Name: CollectSFX
   m_TagString: Untagged
@@ -144,3 +145,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   minPitch: 0.8
   maxPitch: 1.2
+--- !u!114 &9065435799685854868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50792289071673711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a2e6f5d6eabb41b0fa08b9fc7e928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DestroyThis
+  destroyDelay: 1

@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public GameObject flowerPrefab;
     public LightingManager lightingManager;
     public DialogueRunner dialogueRunner;
+    public LookAt lookAtScript;
 
     [Header("Day 1")]
     public GameObject[] dialogueDay1;
@@ -96,15 +97,19 @@ public class GameManager : MonoBehaviour
             {
                 case 1:
                     dialogueRunner.StartDialogue("DayOneEndDialogue");
+                    StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
                     break;
                 case 2:
                     dialogueRunner.StartDialogue("DayTwoEndDialogue");
+                    StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
                     break;
                 case 3:
                     dialogueRunner.StartDialogue("DayThreeEndDialogue");
+                    StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
                     break;
                 default:
                     dialogueRunner.StartDialogue("DayOneEndDialogue");
+                    StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
                     break;
             }
         }
@@ -172,21 +177,30 @@ public class GameManager : MonoBehaviour
         foreach (GameObject dialogue in dialogueDay1)
         {
             DialogueInteract interact = dialogue.GetComponent<DialogueInteract>();
-            if (interact != null) interact.ResetInteraction();
+            if (interact != null)
+            {
+                interact.ResetInteraction();
+            }
             dialogue.SetActive(false);
         }
 
         foreach (GameObject dialogue in dialogueDay2)
         {
             DialogueInteract interact = dialogue.GetComponent<DialogueInteract>();
-            if (interact != null) interact.ResetInteraction();
+            if (interact != null)
+            {
+                interact.ResetInteraction();
+            }
             dialogue.SetActive(false);
         }
 
         foreach (GameObject dialogue in dialogueDay3)
         {
             DialogueInteract interact = dialogue.GetComponent<DialogueInteract>();
-            if (interact != null) interact.ResetInteraction();
+            if (interact != null)
+            {
+                interact.ResetInteraction();
+            }
             dialogue.SetActive(false);
         }
     }

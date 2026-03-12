@@ -11,14 +11,16 @@ public class DialogueInteract : MonoBehaviour
     
     [Tooltip("The Yarn node to start when talking to this NPC")]
     [SerializeField] private string dialogueNode = "Start";
-    public bool touchToInteract = false;
-    public bool canInteractMultipleTimes = true;
     private bool _hasBeenInteractedWith = false;
+    public bool isUsingNumberOfTimesActive = false;
+    public int numberOfTimesActive = 1;
+    private int _saveNumberOfTimesActive = 1;
     public bool inDialogue = false;
 
     [Header("Input Settings")]
     [Tooltip("The key to press to start dialogue")]
     [SerializeField] private Key interactionKey = Key.Enter;
+    public bool touchToInteract = false;
 
     [Header("Despawn Actions")]
     public bool DespawnSomething = false;
@@ -40,15 +42,26 @@ public class DialogueInteract : MonoBehaviour
     {
         _hasBeenInteractedWith = false;
         _hasRotatedToCharacter = false;
+        numberOfTimesActive = _saveNumberOfTimesActive;
 
         if(!this.gameObject.activeInHierarchy)
         {
             this.gameObject.SetActive(true);
         }
     }
+
+    private void OnEnable()
+    {
+        ResetInteraction();
+    }
+
+    private void Awake()
+    {
+        _saveNumberOfTimesActive = numberOfTimesActive;
+    }
+
     private void Start()
     {
-
         // Validate references
         if (dialogueRunner == null)
         {
@@ -142,12 +155,15 @@ public class DialogueInteract : MonoBehaviour
                     jumpAction.Enable();
                 }
             }
-            if (!canInteractMultipleTimes)
+
+            if(numberOfTimesActive > 0 && isUsingNumberOfTimesActive)
             {
-                _hasBeenInteractedWith = true;
+                numberOfTimesActive--;
+                if(numberOfTimesActive <= 0)
+                {
+                    _hasBeenInteractedWith = true;
+                }
             }
-            
-            Debug.Log($"Player left range of {gameObject.name}");
         }
     }
 
@@ -166,14 +182,10 @@ public class DialogueInteract : MonoBehaviour
 
         isCurrentlyTalking = true;
         inDialogue = true;
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = true;
         
 
         // Start the dialogue
         dialogueRunner.StartDialogue(dialogueNode);
-        
-        Debug.Log($"Started dialogue: {dialogueNode}");
     }
 
     private void OnDialogueComplete()
