@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     bool collectedAllFlowers = false;
     public bool isNightTime = false;
     public int currentDay = 1;
+    public int cycleCount = 0;
     public Transform[] flowerSpawns;
     public GameObject flowerPrefab;
     public LightingManager lightingManager;
@@ -17,6 +18,7 @@ public class GameManager : MonoBehaviour
     public LookAt lookAtScript;
     public Slider flowerProgressSlider;
     public Animator GUIAnimator;
+    [SerializeField] private PlayerInputHandler[] playerInputHandler;
 
     [Header("Day 1")]
     public GameObject[] dialogueDay1;
@@ -27,6 +29,11 @@ public class GameManager : MonoBehaviour
     [Header("Day 3")]
     public GameObject[] dialogueDay3;
     public GameObject flowerAiPrefab;
+
+    [Header("Room")]
+    public GameObject PlayerFlower;
+    public GameObject PlayerRoom;
+    public bool isInRoom = false;
 
     private void Awake()
     {
@@ -47,6 +54,29 @@ public class GameManager : MonoBehaviour
         SpawnFlowers();
 
         DayOneSetup();
+    }
+
+    public void OnSwitchToRoom()
+    {
+        if( playerInputHandler[0].SwitchToRoomTriggered || playerInputHandler[1].SwitchToRoomTriggered)
+        {
+            if(isInRoom)
+            {
+                PlayerFlower.SetActive(false);
+                PlayerRoom.SetActive(true);
+                playerInputHandler[0].enabled = false;
+                playerInputHandler[1].enabled = true;
+                isInRoom = false;
+            }
+            else
+            {
+                PlayerFlower.SetActive(true);
+                PlayerRoom.SetActive(false);
+                playerInputHandler[0].enabled = true;
+                playerInputHandler[1].enabled = false;
+                isInRoom = true;
+            }
+        }
     }
 
     public void CollectFlower()
@@ -83,6 +113,15 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+
+        if(cycleCount <= 1)
+        {
+            if(playerInputHandler[0].SwitchToRoomTriggered || playerInputHandler[1].SwitchToRoomTriggered)
+            {
+                OnSwitchToRoom();
+            }
+        }
+
     }
 
     public void ResetGame()
