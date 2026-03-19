@@ -1,5 +1,6 @@
 using UnityEngine;
 using Yarn.Unity;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class GameManager : MonoBehaviour
     public LightingManager lightingManager;
     public DialogueRunner dialogueRunner;
     public LookAt lookAtScript;
+    public Slider flowerProgressSlider;
+    public Animator GUIAnimator;
 
     [Header("Day 1")]
     public GameObject[] dialogueDay1;
@@ -49,6 +52,7 @@ public class GameManager : MonoBehaviour
     public void CollectFlower()
     {
         flowersCollected++;
+        flowerProgressSlider.value = totalFlowers - flowersCollected;
     }
 
     public void FixedUpdate()
@@ -59,6 +63,7 @@ public class GameManager : MonoBehaviour
             {
                 collectedAllFlowers = true;
                 lightingManager.TriggerNightTransition();
+                GUIAnimator.SetTrigger("TurnOff");
                 isNightTime = true;
                 
                 switch (currentDay)
@@ -140,6 +145,7 @@ public class GameManager : MonoBehaviour
 
     public void DaySwitch()
     {
+        GUIAnimator.SetTrigger("TurnOn");
         switch (currentDay)
         {
             case 1:
@@ -212,6 +218,9 @@ public class GameManager : MonoBehaviour
         {
             dialogue.SetActive(true);
         }
+
+        flowerProgressSlider.maxValue = totalFlowers;
+        flowerProgressSlider.value = totalFlowers;
     }
 
     public void DayTwoSetup()
@@ -221,6 +230,8 @@ public class GameManager : MonoBehaviour
         {
             dialogue.SetActive(true);
         }
+        flowerProgressSlider.maxValue = totalFlowers;
+        flowerProgressSlider.value = totalFlowers;
     }
 
     public void DayThreeSetup()
@@ -230,6 +241,8 @@ public class GameManager : MonoBehaviour
         {
             dialogue.SetActive(true);
         }
+        flowerProgressSlider.maxValue = totalFlowers;
+        flowerProgressSlider.value = totalFlowers;
     }
 
 }
