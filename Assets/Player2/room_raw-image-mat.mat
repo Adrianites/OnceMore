@@ -103,7 +103,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
-    - _DitherOpacity: 0.04
+    - _DitherOpacity: 0
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
@@ -113,10 +113,10 @@ Material:
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
-    - _Quantisation_Level: 64
+    - _Quantisation_Level: 1
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Saturation_Layers_in_palette: 3
+    - _Saturation_Layers_in_palette: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -128,7 +128,7 @@ Material:
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
     - _Surface: 0
-    - _Turn_on_Colour_Palette: 1
+    - _Turn_on_Colour_Palette: 0
     - _UIMaskSoftnessX: 1
     - _UIMaskSoftnessY: 1
     - _WorkflowMode: 1

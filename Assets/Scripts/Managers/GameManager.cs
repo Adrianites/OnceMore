@@ -33,7 +33,9 @@ public class GameManager : MonoBehaviour
     [Header("Room")]
     public GameObject PlayerFlower;
     public GameObject PlayerRoom;
+    public GameObject pressFCanvas;
     public bool isInRoom = false;
+    public bool canSwitchToRoom = false;
 
     private void Awake()
     {
@@ -50,6 +52,7 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
+        pressFCanvas.SetActive(false);
         totalFlowers = flowerSpawns.Length;
         SpawnFlowers();
 
@@ -62,6 +65,7 @@ public class GameManager : MonoBehaviour
         {
             if(isInRoom)
             {
+                pressFCanvas.SetActive(false);
                 PlayerFlower.SetActive(false);
                 PlayerRoom.SetActive(true);
                 playerInputHandler[0].enabled = false;
@@ -70,6 +74,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
+                pressFCanvas.SetActive(true);
                 PlayerFlower.SetActive(true);
                 PlayerRoom.SetActive(false);
                 playerInputHandler[0].enabled = true;
@@ -114,7 +119,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if(cycleCount <= 1)
+        if(cycleCount >= 1 && canSwitchToRoom)
         {
             if(playerInputHandler[0].SwitchToRoomTriggered || playerInputHandler[1].SwitchToRoomTriggered)
             {
@@ -128,7 +133,20 @@ public class GameManager : MonoBehaviour
     {
         if(currentDay <= 3)
         {
-            currentDay++;
+            if(currentDay != 3)
+            {
+                currentDay++;
+            }
+            else
+            {
+                currentDay = 1;
+                cycleCount++;
+                canSwitchToRoom = true;
+                pressFCanvas.SetActive(true);
+                dialogueRunner.StartDialogue("DayThreeEndDialogue");
+                StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
+            }
+            Debug.Log("Current Day: " + currentDay);
             flowersCollected = 0;
             totalFlowers = flowerSpawns.Length;
             collectedAllFlowers = false;
@@ -147,21 +165,8 @@ public class GameManager : MonoBehaviour
                     dialogueRunner.StartDialogue("DayTwoEndDialogue");
                     StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
                     break;
-                case 3:
-                    dialogueRunner.StartDialogue("DayThreeEndDialogue");
-                    StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
-                    break;
-                default:
-                    dialogueRunner.StartDialogue("DayOneEndDialogue");
-                    StartCoroutine(lookAtScript.RotateBothToFaceEachOther());
-                    break;
             }
-        }
-        else
-        {
-            currentDay = 1;
-        }
-        
+        }     
     }
 
     public void SpawnFlowers()

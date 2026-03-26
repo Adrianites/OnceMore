@@ -135,8 +135,6 @@ public class DialogueInteract : MonoBehaviour
                     jumpAction.Disable();
                 }
             }
-            
-            Debug.Log($"Player entered range of {gameObject.name}");
         }
     }
 

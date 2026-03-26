@@ -1,7 +1,28 @@
 ﻿title: Start
 ---
+<<declare $gameOver = false>>
+<<declare $currentCycle = 0>>
+    <<jump Start2>>
+===
+
+title: Start2
+---
 <<playSFX 1>>
 Me: What a beautiful day to pick some flowers.
+
+<<if $gameOver == true>>
+    <<if $currentCycle == 1>>
+        PlayTester: I guess the game is over now...
+    <<elseif $currentCycle == 2>>
+        PlayTester: There's nothing more in the game to see or do...
+    <<elseif $currentCycle == 3>>
+        PlayTester: I should really stop playing this game now...
+    <<elseif $currentCycle == 4>>
+        PlayTester: Why am I still playing this game? I have seen everything there is to see...
+    <<elseif $currentCycle >= 5>>
+        PlayTester: ...
+    <<endif>>
+<<endif>>
     <<stop>>
 ===
 
@@ -77,5 +98,7 @@ title: DayThreeEndDialogue
 <<playSFX 1>>
 Me: I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster.. I am a monster..
 Me: No.......
-    <<jump Start>>
+    <<set $currentCycle to $currentCycle + 1>>
+    <<set $gameOver = true>>
+    <<jump Start2>>
 ===

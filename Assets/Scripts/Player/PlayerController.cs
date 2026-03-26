@@ -69,7 +69,10 @@ public class PlayerController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        CameraShakeManager.instance.CameraShake(impulseSource); 
+        if(impulseSource != null)
+        {
+            CameraShakeManager.instance.CameraShake(impulseSource);
+        }
     }
 
     private Vector3 CalculateWorldDirection()

@@ -107,7 +107,6 @@ public class AI_BasicStates : MonoBehaviour
     {
         if (currentState == newState) return;
 
-        Debug.Log($"AI State: {currentState} -> {newState}");
         currentState = newState;
 
         switch (newState)
@@ -173,7 +172,6 @@ public class AI_BasicStates : MonoBehaviour
         if (player != null)
         {
             transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-            Debug.Log("Attacking player!");
         }
     }
 

@@ -6,8 +6,8 @@ public class ResetFlowers : MonoBehaviour
     {
         if (other.CompareTag("Player") && GameManager.Instance.isNightTime)
         {
+            Debug.Log("Resetting");
             GameManager.Instance.ResetGame();
-            Debug.Log("Game reset!");
         }
     }
 }
