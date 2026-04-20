@@ -60876,7 +60876,7 @@ Transform:
   m_GameObject: {fileID: 392770773}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0361, y: 0.6685, z: -1.254}
+  m_LocalPosition: {x: 0.243, y: 0.6685, z: -0.187}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -318620,11 +318620,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.3979439
+      value: 1.0726563
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 16.672
+      value: 16.181
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalPosition.y
@@ -318632,23 +318632,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 15.435
+      value: 14.22
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.96371526
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 0.26693246
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -318656,7 +318656,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 30.964
       objectReference: {fileID: 0}
     - target: {fileID: 3086202458839511525, guid: 76d48d43b862266439b8b9697de3a3ce, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -407856,14 +407856,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8371668234143063304}
     - target: {fileID: 4662511063600239229, guid: 7238fb40f0fae2e409e262df698eb3e1, type: 3}
-      propertyPath: currentDay
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 4662511063600239229, guid: 7238fb40f0fae2e409e262df698eb3e1, type: 3}
-      propertyPath: cycleCount
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4662511063600239229, guid: 7238fb40f0fae2e409e262df698eb3e1, type: 3}
       propertyPath: fadeCanvas
       value: 
       objectReference: {fileID: 0}
@@ -407891,10 +407883,6 @@ PrefabInstance:
       propertyPath: switchAudioMode
       value: 
       objectReference: {fileID: 162042624}
-    - target: {fileID: 4662511063600239229, guid: 7238fb40f0fae2e409e262df698eb3e1, type: 3}
-      propertyPath: flowersCollected
-      value: 14
-      objectReference: {fileID: 0}
     - target: {fileID: 4662511063600239229, guid: 7238fb40f0fae2e409e262df698eb3e1, type: 3}
       propertyPath: player.Array.size
       value: 2
