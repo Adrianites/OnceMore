@@ -1,6 +1,7 @@
 using UnityEngine;
 using Yarn.Unity;
 using UnityEngine.UI;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviour
     public Slider flowerProgressSlider;
     public Animator GUIAnimator;
     [SerializeField] private PlayerInputHandler[] playerInputHandler;
+    [SerializeField] private SwitchAudioMode switchAudioMode;
 
     [Header("Day 1")]
     public GameObject[] dialogueDay1;
@@ -46,7 +48,6 @@ public class GameManager : MonoBehaviour
         else
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
     }
 
@@ -57,31 +58,6 @@ public class GameManager : MonoBehaviour
         SpawnFlowers();
 
         DayOneSetup();
-    }
-
-    public void OnSwitchToRoom()
-    {
-        if( playerInputHandler[0].SwitchToRoomTriggered || playerInputHandler[1].SwitchToRoomTriggered)
-        {
-            if(isInRoom)
-            {
-                pressFCanvas.SetActive(false);
-                PlayerFlower.SetActive(false);
-                PlayerRoom.SetActive(true);
-                playerInputHandler[0].enabled = false;
-                playerInputHandler[1].enabled = true;
-                isInRoom = false;
-            }
-            else
-            {
-                pressFCanvas.SetActive(true);
-                PlayerFlower.SetActive(true);
-                PlayerRoom.SetActive(false);
-                playerInputHandler[0].enabled = true;
-                playerInputHandler[1].enabled = false;
-                isInRoom = true;
-            }
-        }
     }
 
     public void CollectFlower()
@@ -119,14 +95,40 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if(cycleCount >= 1 && canSwitchToRoom)
+        if(cycleCount >= 1 && canSwitchToRoom && !dialogueRunner.IsDialogueRunning)
         {
             if(playerInputHandler[0].SwitchToRoomTriggered || playerInputHandler[1].SwitchToRoomTriggered)
             {
                 OnSwitchToRoom();
             }
         }
+    }
 
+    public void OnSwitchToRoom()
+    {
+        if(playerInputHandler[0].SwitchToRoomTriggered || playerInputHandler[1].SwitchToRoomTriggered)
+        {
+            if(isInRoom)
+            {
+                switchAudioMode.SwitchAudioTo3DMode();
+                pressFCanvas.SetActive(false);
+                PlayerFlower.SetActive(false);
+                PlayerRoom.SetActive(true);
+                playerInputHandler[0].enabled = false;
+                playerInputHandler[1].enabled = true;
+                isInRoom = false;
+            }
+            else
+            {
+                switchAudioMode.SwitchAudioTo2DMode();
+                pressFCanvas.SetActive(true);
+                PlayerFlower.SetActive(true);
+                PlayerRoom.SetActive(false);
+                playerInputHandler[0].enabled = true;
+                playerInputHandler[1].enabled = false;
+                isInRoom = true;
+            }
+        }
     }
 
     public void ResetGame()

@@ -1,0 +1,27 @@
+﻿title: roomDialogue1
+---
+<<once>>
+<<playSFX 4>>
+Play Tester: This game was pretty good.
+<<playSFX 4>>
+Play Tester: I liked the art style and the music. The story was interesting and kept me engaged.
+<<endonce>>
+<<playSFX 4>>
+Play Tester: I can keep playing this game but I dont think there's anything else to do.
+    ->Play Tester: I think thats a good place to stop playing. I have seen everything there is to see in this game.
+        <<EndGame>>
+    ->Play Tester: I want to keep playing.
+        <<stop>>
+===
+
+title: roomDialogue2
+---
+<<playSFX 4>>
+Play Tester: The fridge is empty.
+===
+
+title: roomDialogue3
+---
+<<playSFX 4>>
+Play Tester: I love to sleep in this bed.
+===

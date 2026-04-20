@@ -375,6 +375,7 @@ MonoBehaviour:
   rotation: Look
   jump: Jump
   sprint: Sprint
+  switchToRoom: SwitchToRoom
 --- !u!1 &7946497619850637734
 GameObject:
   m_ObjectHideFlags: 0
@@ -697,7 +698,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterTalk
   characterId: 1
   audioSource: {fileID: 1466678553193768515}
-  soundEffect: {fileID: 8300000, guid: 8667ed614930c814e84664b7c584fd6c, type: 3}
+  soundEffect: {fileID: 8300000, guid: 1a4c863e0913f804a95682038ef2503d, type: 3}
   randomizePitch: 1
   minPitch: 0.9
   maxPitch: 1.1

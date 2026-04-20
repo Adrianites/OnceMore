@@ -32,6 +32,7 @@ public class DialogueInteract : MonoBehaviour
     [SerializeField] private float characterRotationDuration = 0.25f;
     private bool _hasRotatedToCharacter = false;
     private Transform playerTransform;
+    public GameObject player;
 
     // State tracking
     private bool playerInRange = false;
@@ -71,9 +72,7 @@ public class DialogueInteract : MonoBehaviour
                 Debug.LogError($"NPCInteraction on {gameObject.name}: No DialogueRunner found in scene!");
             }
         }
-
-        // Find PlayerInput component
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        
         if (player != null)
         {
             playerInput = player.GetComponent<PlayerInput>();
